@@ -41,6 +41,11 @@ on:
         type: boolean
         description: 'Clean build (ignore sstate cache)'
         default: false
+      release_url:
+        description: "Release upload URL"
+        required: false
+        default: ''
+
   workflow_call:
     inputs:
       machine:
@@ -694,8 +699,8 @@ jobs:
             echo "Found deploy directory: $DEPLOY_DIR"
             ls -la "$DEPLOY_DIR"
             # cp -rf "$DEPLOY_DIR" ${{ github.workspace }}/release/
-            cp -f $DEPLOY_DIR/*.wic.bz2 ${{ github.workspace }}/release/ || echo "No matching images found to copy"
-            cp -f $DEPLOY_DIR/*.mender ${{ github.workspace }}/release/ || echo "No matching mender found to copy"
+            cp -f $DEPLOY_DIR/*mender.wic.bz2 ${{ github.workspace }}/release/ || echo "No matching images found to copy"
+            cp -f $DEPLOY_DIR/*mender.mender ${{ github.workspace }}/release/ || echo "No matching mender found to copy"
           fi
           
           # Create build information file
@@ -1124,3 +1129,16 @@ jobs:
           echo "Cleaning up workspace..."
           # Show final disk usage
           df -h
+
+  upload-release:
+    name: Upload GitHub Release
+    runs-on: ubuntu-24.04
+    needs: build-yocto-image
+    if: always() && needs.build-yocto-image.outputs.build-success == 'true' && inputs.release_url != ''
+
+    steps:
+      - name: Upload release assets
+        uses: actions/upload-release-asset@v1.0.2
+        with:
+          upload_url: ${{ inputs.release_url }}
+          asset_path: ${{ github.workspace }}/release/*
