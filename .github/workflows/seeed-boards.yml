@@ -177,7 +177,8 @@ jobs:
           
           # Move checked out meta-seeed-cm4 to layers directory
           mv meta-seeed-cm4 layers/
-          
+          cp -r layers/meta-seeed-cm4/kas ./layers
+
           # Clone required layers with correct branches
           echo "Cloning Poky..."
           git clone -b scarthgap https://git.yoctoproject.org/poky layers/poky
@@ -211,22 +212,22 @@ jobs:
           # Set KAS file based on machine
           case "${{ inputs.machine }}" in
             "seeed-recomputer-r100x-mender")
-              KAS_FILE="layers/meta-seeed-cm4/kas/seeed-recomputer-r100x-mender.yml"
+              KAS_FILE="kas/seeed-recomputer-r100x-mender.yml"
               ;;
             "seeed-reterminal-mender")
-              KAS_FILE="layers/meta-seeed-cm4/kas/seeed-reterminal-mender.yml"
+              KAS_FILE="kas/seeed-reterminal-mender.yml"
               ;;
             "seeed-reterminal-DM-mender")
-              KAS_FILE="layers/meta-seeed-cm4/kas/seeed-reterminal-DM-mender.yml"
+              KAS_FILE="kas/seeed-reterminal-DM-mender.yml"
               ;;
             "seeed-rerouter-cm4-mender")
-              KAS_FILE="layers/meta-seeed-cm4/kas/seeed-rerouter-cm4-mender.yml"
+              KAS_FILE="kas/seeed-rerouter-cm4-mender.yml"
               ;;
             "seeed-recomputer-r2x-mender")
-              KAS_FILE="layers/meta-seeed-cm4/kas/seeed-recomputer-r2x-mender.yml"
+              KAS_FILE="kas/seeed-recomputer-r2x-mender.yml"
               ;;
             *)
-              KAS_FILE="layers/meta-seeed-cm4/kas/seeed-recomputer-r100x-mender.yml"
+              KAS_FILE="kas/seeed-recomputer-r100x-mender.yml"
               ;;
           esac
           
@@ -236,7 +237,7 @@ jobs:
           if [ ! -f "$KAS_FILE" ]; then
             echo "ERROR: KAS file not found: $KAS_FILE"
             echo "Available KAS files:"
-            ls -la layers/meta-seeed-cm4/kas/ || echo "No kas directory found"
+            ls -la kas/ || echo "No kas directory found"
             exit 1
           fi
           
@@ -737,9 +738,7 @@ jobs:
           if [ -d "$DEPLOY_DIR" ]; then
             echo "Found deploy directory: $DEPLOY_DIR"
             ls -la "$DEPLOY_DIR"
-            # cp -rf "$DEPLOY_DIR" ${{ github.workspace }}/release/
-            cp -f $DEPLOY_DIR/*.wic.bz2 ${{ github.workspace }}/release/ || echo "No matching images found to copy"
-            cp -f $DEPLOY_DIR/*.mender ${{ github.workspace }}/release/ || echo "No matching mender found to copy"
+            cp -rf "$DEPLOY_DIR" ${{ github.workspace }}/release/
           fi
           
           # Create build information file
