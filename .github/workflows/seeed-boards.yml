@@ -177,28 +177,7 @@ jobs:
           
           # Move checked out meta-seeed-cm4 to layers directory
           mv meta-seeed-cm4 layers/
-          
-          # Clone required layers with correct branches
-          echo "Cloning Poky..."
-          git clone -b scarthgap https://git.yoctoproject.org/poky layers/poky
-          
-          echo "Cloning meta-openembedded..."
-          git clone -b scarthgap git://git.openembedded.org/meta-openembedded.git layers/meta-openembedded
-          
-          echo "Cloning meta-raspberrypi..."
-          git clone -b scarthgap https://github.com/agherzan/meta-raspberrypi.git layers/meta-raspberrypi
-          
-          echo "Cloning meta-mender..."
-          git clone -b scarthgap https://github.com/mendersoftware/meta-mender.git layers/meta-mender
-          
-          echo "Cloning meta-mender-community..."
-          git clone -b scarthgap https://github.com/mendersoftware/meta-mender-community.git layers/meta-mender-community
-          
-          echo "Cloning meta-lts-mixins..."
-          git clone https://git.yoctoproject.org/meta-lts-mixins.git layers/meta-lts-mixins
-          cd layers/meta-lts-mixins
-          git checkout a44882db02a0ed0f149371831bfbe067665eb42b
-          cd ../..
+          cp -r layers/meta-seeed-cm4/kas/* layers/
 
       - name: Yocto fetchall for clean build
         if: ${{ inputs.clean_build }}
@@ -211,22 +190,22 @@ jobs:
           # Set KAS file based on machine
           case "${{ inputs.machine }}" in
             "seeed-recomputer-r100x-mender")
-              KAS_FILE="layers/meta-seeed-cm4/kas/seeed-recomputer-r100x-mender.yml"
+              KAS_FILE="layers/seeed-recomputer-r100x-mender.yml"
               ;;
             "seeed-reterminal-mender")
-              KAS_FILE="layers/meta-seeed-cm4/kas/seeed-reterminal-mender.yml"
+              KAS_FILE="layers/seeed-reterminal-mender.yml"
               ;;
             "seeed-reterminal-DM-mender")
-              KAS_FILE="layers/meta-seeed-cm4/kas/seeed-reterminal-DM-mender.yml"
+              KAS_FILE="layers/seeed-reterminal-DM-mender.yml"
               ;;
             "seeed-rerouter-cm4-mender")
-              KAS_FILE="layers/meta-seeed-cm4/kas/seeed-rerouter-cm4-mender.yml"
+              KAS_FILE="layers/seeed-rerouter-cm4-mender.yml"
               ;;
             "seeed-recomputer-r2x-mender")
-              KAS_FILE="layers/meta-seeed-cm4/kas/seeed-recomputer-r2x-mender.yml"
+              KAS_FILE="layers/seeed-recomputer-r2x-mender.yml"
               ;;
             *)
-              KAS_FILE="layers/meta-seeed-cm4/kas/seeed-recomputer-r100x-mender.yml"
+              KAS_FILE="layers/seeed-recomputer-r100x-mender.yml"
               ;;
           esac
           
@@ -236,10 +215,12 @@ jobs:
           if [ ! -f "$KAS_FILE" ]; then
             echo "ERROR: KAS file not found: $KAS_FILE"
             echo "Available KAS files:"
-            ls -la layers/meta-seeed-cm4/kas/ || echo "No kas directory found"
+            ls -la layers/ || echo "No kas directory found"
             exit 1
           fi
           
+          ls layers/
+          ls ./
           # Run fetchall using KAS to download all sources
           echo "Starting fetchall process..."
           kas shell $KAS_FILE -c "bitbake core-image-minimal --runall=fetch"
@@ -737,9 +718,7 @@ jobs:
           if [ -d "$DEPLOY_DIR" ]; then
             echo "Found deploy directory: $DEPLOY_DIR"
             ls -la "$DEPLOY_DIR"
-            # cp -rf "$DEPLOY_DIR" ${{ github.workspace }}/release/
-            cp -f $DEPLOY_DIR/*.wic.bz2 ${{ github.workspace }}/release/ || echo "No matching images found to copy"
-            cp -f $DEPLOY_DIR/*.mender ${{ github.workspace }}/release/ || echo "No matching mender found to copy"
+            cp -rf "$DEPLOY_DIR" ${{ github.workspace }}/release/
           fi
           
           # Create build information file
