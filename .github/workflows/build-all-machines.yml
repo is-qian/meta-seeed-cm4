@@ -17,7 +17,7 @@ on:
       clean_build:
         type: boolean
         description: 'Force clean build for all machines'
-        default: true
+        default: false
       tag_name:
         description: 'Tag name'
         required: true
@@ -61,7 +61,7 @@ jobs:
                     "build_type": "${{ inputs.build_type }}", 
                     "disable_upload_downloads": ${{ inputs.disable_upload_downloads }}, 
                     "clean_build": ${{ inputs.clean_build }}, 
-                    "release_url": "${{ steps.create_release.outputs.upload_url }}"
+                    "tag_name": "${{ env.TAG_NAME }}"
                 }
 
       - name: build seeed-reterminal image
@@ -75,7 +75,7 @@ jobs:
                     "build_type": "${{ inputs.build_type }}",
                     "disable_upload_downloads": ${{ inputs.disable_upload_downloads }},
                     "clean_build": ${{ inputs.clean_build }},
-                    "release_url": "${{ steps.create_release.outputs.upload_url }}"
+                    "tag_name": "${{ env.TAG_NAME }}"
                 }
 
       - name: build seeed-reterminal-DM image
@@ -89,7 +89,7 @@ jobs:
                     "build_type": "${{ inputs.build_type }}",
                     "disable_upload_downloads": ${{ inputs.disable_upload_downloads }},
                     "clean_build": ${{ inputs.clean_build }},
-                    "release_url": "${{ steps.create_release.outputs.upload_url }}"
+                    "tag_name": "${{ env.TAG_NAME }}"
                 }
 
       - name: build seeed-rerouter-cm4 image
@@ -103,7 +103,7 @@ jobs:
                     "build_type": "${{ inputs.build_type }}",
                     "disable_upload_downloads": ${{ inputs.disable_upload_downloads }},
                     "clean_build": ${{ inputs.clean_build }},
-                    "release_url": "${{ steps.create_release.outputs.upload_url }}"
+                    "tag_name": "${{ env.TAG_NAME }}"
                 }
 
       - name: build seeed-recomputer-r2x image
@@ -117,5 +117,5 @@ jobs:
                     "build_type": "${{ inputs.build_type }}",
                     "disable_upload_downloads": ${{ inputs.disable_upload_downloads }},
                     "clean_build": ${{ inputs.clean_build }},
-                    "release_url": "${{ steps.create_release.outputs.upload_url }}"
+                    "tag_name": "${{ env.TAG_NAME }}"
                 }

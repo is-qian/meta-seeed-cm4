@@ -41,8 +41,8 @@ on:
         type: boolean
         description: 'Clean build (ignore sstate cache)'
         default: false
-      release_url:
-        description: "Release upload URL"
+      tag_name:
+        description: "Release tag name"
         required: false
         default: ''
 
@@ -1106,11 +1106,24 @@ jobs:
     name: Upload GitHub Release
     runs-on: ubuntu-24.04
     needs: build-yocto-image
-    if: always() && needs.build-yocto-image.outputs.build-success == 'true' && inputs.release_url != ''
+    if: always() && needs.build-yocto-image.outputs.build-success == 'true' && inputs.tag_name != ''
 
     steps:
+      - name: Tar release files
+        run: |
+          if ls ${{ github.workspace }}/release/* >/dev/null 2>&1; then
+            tar --format=posix --sort=name --mtime=0 -czf ${{ github.workspace }}/release/${{ inputs.machine }}-image.tar.gz -C ${{ github.workspace }}/release .
+            echo "Release tarball created: $(ls -lh ${{ github.workspace }}/release/${{ inputs.machine }}-image.tar.gz)"
+          fi
+
       - name: Upload release assets
-        uses: actions/upload-release-asset@v1.0.2
-        with:
-          upload_url: ${{ inputs.release_url }}
-          asset_path: ${{ github.workspace }}/release/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if ls ${{ github.workspace }}/release/* >/dev/null 2>&1; then
+            echo "Uploading release assets to GitHub Release..."
+            gh release upload ${{ inputs.tag_name }} ${{ github.workspace }}/release/${{ inputs.machine }}-image.tar.gz --clobber
+            echo "Release assets uploaded successfully"
+          else
+            echo "No release files found to upload"
+          fi
